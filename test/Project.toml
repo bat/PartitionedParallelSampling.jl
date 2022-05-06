@@ -1,0 +1,14 @@
+[deps]
+AHMI = "c5d2b564-8713-4ef5-a2ca-05a0d64fcc84"
+BAT = "c0cd4b16-88b7-57fa-983b-ab80aecada7e"
+DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+TerminalLoggers = "5d786b92-1e48-4d6f-9151-6b4477ca9bed"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+ValueShapes = "136a8f8c-c49b-4edb-8b98-f3d64d48be8f"
+
+[compat]
+Documenter = "~0.27"
