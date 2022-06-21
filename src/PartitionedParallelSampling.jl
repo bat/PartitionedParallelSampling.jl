@@ -25,10 +25,10 @@ using Parameters: @with_kw
 using DocStringExtensions
 
 import BAT
-using BAT: AbstractDensity, AbstractPosteriorDensity, PosteriorDensity
+using BAT: AbstractMeasureOrDensity, AbstractPosteriorMeasure, PosteriorMeasure
 using BAT: bat_sample, AbstractSamplingAlgorithm, MCMCSampling, OrderedResampling
 using BAT: bat_integrate, IntegrationAlgorithm, DensitySampleVector
-using BAT: bat_transform, AbstractDensityTransformTarget, PriorToUniform
+using BAT: bat_transform, AbstractTransformTarget, PriorToUniform
 
 # BAT-experimental:
 using BAT: truncate_density

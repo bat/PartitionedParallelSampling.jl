@@ -15,7 +15,7 @@ Fields:
 $(TYPEDFIELDS)
 """
 @with_kw struct PartitionedSampling{
-    TR<:AbstractDensityTransformTarget,
+    TR<:AbstractTransformTarget,
     S<:AbstractSamplingAlgorithm,
     E<:AbstractSamplingAlgorithm,
     I<:IntegrationAlgorithm,
@@ -32,9 +32,9 @@ end
 
 export PartitionedSampling
 
-function BAT.bat_sample_impl(rng::AbstractRNG, target::PosteriorDensity, algorithm::PartitionedSampling)
+function BAT.bat_sample_impl(rng::AbstractRNG, target::PosteriorMeasure, algorithm::PartitionedSampling)
 
-    density_notrafo = convert(AbstractDensity, target)
+    density_notrafo = convert(AbstractMeasureOrDensity, target)
     shaped_density, trafo = bat_transform(algorithm.trafo, density_notrafo)
     density = unshaped(shaped_density)
 
@@ -134,7 +134,7 @@ end
 
 function sample_subspace(
     space_id::Integer,
-    posterior::PosteriorDensity,
+    posterior::PosteriorMeasure,
     sampling_algorithm::A,
 ) where {N<:NamedTuple, A<:AbstractSamplingAlgorithm, I<:IntegrationAlgorithm}
 
@@ -193,9 +193,9 @@ function integrate_subspace(
 end
 
 function convert_to_posterior_resampled(
-    posterior::PosteriorDensity,
+    posterior::PosteriorMeasure,
     partition_tree::SpacePartTree,
-    posterior_subspace::PosteriorDensity;
+    posterior_subspace::PosteriorMeasure;
     extend_bounds::Bool=true
 )
 
@@ -219,7 +219,7 @@ function convert_to_posterior_resampled(
         x -> begin
             bounds = HyperRectBounds(x[:,1], x[:,2])
             prior_dist = truncate_density(getprior(posterior), bounds)
-            PosteriorDensity(getlikelihood(posterior), prior_dist)
+            PosteriorMeasure(getlikelihood(posterior), prior_dist)
         end,
     subspaces_rect_bounds)
 
@@ -228,7 +228,7 @@ end
 
 
 
-function convert_to_posterior(posterior::PosteriorDensity, partition_tree::SpacePartTree; extend_bounds::Bool=true)
+function convert_to_posterior(posterior::PosteriorMeasure, partition_tree::SpacePartTree; extend_bounds::Bool=true)
 
     if extend_bounds
         # Exploration samples might not always cover properly tails of the distribution.

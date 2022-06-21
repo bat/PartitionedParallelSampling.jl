@@ -4,7 +4,7 @@ using PartitionedParallelSampling
 using Test
 using Distributions, LinearAlgebra, DensityInterface, ValueShapes
 
-using BAT: AbstractPosteriorDensity, PosteriorDensity
+using BAT: AbstractPosteriorMeasure, PosteriorMeasure
 using BAT: bat_sample, MCMCSampling, MetropolisHastings, IIDSampling
 using BAT: bat_transform, PriorToUniform, NoWhitening
 
@@ -26,7 +26,7 @@ using PartitionedParallelSampling: convert_to_posterior
         params -> logpdf(model, params.a)
     end)
 
-    posterior = PosteriorDensity(likelihood, prior)
+    posterior = PosteriorMeasure(likelihood, prior)
     transformed_posterior, trafo = bat_transform(PriorToUniform(), posterior)
 
     #Sampling and integration algorithms
@@ -48,7 +48,7 @@ using PartitionedParallelSampling: convert_to_posterior
     @testset "Array of Posteriors" begin
         posteriors_array = convert_to_posterior(transformed_posterior, results.part_tree, extend_bounds = true)
 
-        @test posteriors_array isa AbstractVector{<:AbstractPosteriorDensity}
+        @test posteriors_array isa AbstractVector{<:AbstractPosteriorMeasure}
         
         #Creates a matrix whose rows represents subspaces, cols represents modes and whose entries are 1s or 0s
         #1 if mean is in the corresponding subspace, 0 otherwise
