@@ -31,13 +31,17 @@ If you use PartitionedParallelSampling as an important part of your work, please
 *Hafych et al. "Parallelizing MCMC Sampling via Space Partitioning", [arXiv:2008.03098 (2020)](https://arxiv.org/abs/2008.03098)*.
 
 ```
-@article{Hafych:2008.03098,
-  author        = {Hafych, Vasyl and Eller, Philipp and Caldwell, Allen and Schulz, Oliver},
-  title         = {Parallelizing MCMC Sampling via Space Partitioning},
-  year          = {2018},
-  month         = {8},
-  archiveprefix = {arXiv},
-  eprint        = {2008.03098},
-  primaryclass  = {stat.CO},
+@article{Hafych:2022PPS,
+  author  = {Hafych, Vasyl and Eller, Philipp and Schulz, Oliver and Caldwell, Allen},
+  title   = {Parallelizing MCMC sampling via space partitioning},
+  journal = {Statistics and Computing},
+  year    = {2022},
+  month   = {Jun},
+  day     = {27},
+  volume  = {32},
+  number  = {4},
+  pages   = {56},
+  issn    = {1573-1375},
+  doi     = {10.1007/s11222-022-10116-z}
 }
 ```
