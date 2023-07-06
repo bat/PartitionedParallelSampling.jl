@@ -32,8 +32,7 @@ end
 
 export PartitionedSampling
 
-function BAT.bat_sample_impl(rng::AbstractRNG, target::PosteriorMeasure, algorithm::PartitionedSampling)
-
+function BAT.bat_sample_impl(rng::AbstractRNG, target::PosteriorMeasure, algorithm::PartitionedSampling, context::BATContext)
     density_notrafo = convert(AbstractMeasureOrDensity, target)
     shaped_density, trafo = bat_transform(algorithm.trafo, density_notrafo)
     density = unshaped(shaped_density)
@@ -49,7 +48,7 @@ function BAT.bat_sample_impl(rng::AbstractRNG, target::PosteriorMeasure, algorit
     @info "Sampling Subspaces"
     iterator_subspaces = [
         [subspace_ind, posteriors_array[subspace_ind], algorithm.sampler] for subspace_ind in Base.OneTo(algorithm.npartitions)]
-    samples_subspaces_run = pmap(inp -> sample_subspace(inp...), iterator_subspaces)
+    samples_subspaces_run = pmap(inp -> sample_subspace(inp..., context), iterator_subspaces)
 
     unconv_mask = [samples_subspace.isvalid for samples_subspace in samples_subspaces_run] # returns "false" if subspace was not converged during tuning cycle
     unconv_ind = findall(x->x==false, unconv_mask)
@@ -74,7 +73,8 @@ function BAT.bat_sample_impl(rng::AbstractRNG, target::PosteriorMeasure, algorit
 
             exploration_samples_rep = bat_sample(
                 samples_subspaces_run[rep_ind].samples,
-                OrderedResampling(nsamples=algorithm.exploration_sampler.nsteps)
+                OrderedResampling(nsamples=algorithm.exploration_sampler.nsteps),
+                context
             ).result
 
             partition_tree_rep, _ = partition_space(exploration_samples_rep, 2, algorithm.partitioner)
@@ -136,12 +136,13 @@ function sample_subspace(
     space_id::Integer,
     posterior::PosteriorMeasure,
     sampling_algorithm::A,
+    context::BATContext
 ) where {N<:NamedTuple, A<:AbstractSamplingAlgorithm, I<:IntegrationAlgorithm}
 
     @info "Sampling subspace #$space_id"
     sampling_wc_start = Dates.Time(Dates.now())
     sampling_cpu_time = @CPUelapsed begin
-        sampling_output = bat_sample(posterior, sampling_algorithm)
+        sampling_output = bat_sample(posterior, sampling_algorithm, context)
         samples_subspace = sampling_output.result
         isvalid = sampling_output.isvalid
     end
@@ -162,6 +163,7 @@ end
 function integrate_subspace(
     sampling_reuslt::N,
     integration_algorithm::I,
+    context::BATContext
 ) where {N<:NamedTuple, A<:AbstractSamplingAlgorithm, I<:IntegrationAlgorithm}
 
     samples_subspace = sampling_reuslt.samples
@@ -169,7 +171,7 @@ function integrate_subspace(
     integration_wc_start = Dates.Time(Dates.now())
     integration_cpu_time = @CPUelapsed begin
         # ToDo: Use samples_subspace_trafo for integration instead of samples_subspace?
-        integras_subspace = bat_integrate(samples_subspace, integration_algorithm).result
+        integras_subspace = bat_integrate(samples_subspace, integration_algorithm, context).result
     end
     integration_wc_stop = Dates.Time(Dates.now())
 

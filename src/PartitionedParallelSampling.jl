@@ -29,6 +29,7 @@ using BAT: AbstractMeasureOrDensity, AbstractPosteriorMeasure, PosteriorMeasure
 using BAT: bat_sample, AbstractSamplingAlgorithm, MCMCSampling, OrderedResampling
 using BAT: bat_integrate, IntegrationAlgorithm, DensitySampleVector
 using BAT: bat_transform, AbstractTransformTarget, PriorToUniform
+using BAT: BATContext
 
 # BAT-experimental:
 using BAT: truncate_density
