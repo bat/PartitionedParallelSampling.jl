@@ -32,9 +32,9 @@ end
 
 export PartitionedSampling
 
-function BAT.bat_sample_impl(rng::AbstractRNG, target::PosteriorMeasure, algorithm::PartitionedSampling, context::BATContext)
-    density_notrafo = convert(AbstractMeasureOrDensity, target)
-    shaped_density, trafo = bat_transform(algorithm.trafo, density_notrafo)
+function BAT.bat_sample_impl(rng::AbstractRNG, target::LBQIntegral, algorithm::PartitionedSampling, context::BATContext)
+    density_notrafo = convert(BATMeasure, target)
+    shaped_density, trafo = bat_transform(algorithm.trafo, density_notrafo, context)
     density = unshaped(shaped_density)
 
     @info "Generating Exploration Samples"
@@ -134,7 +134,7 @@ end
 
 function sample_subspace(
     space_id::Integer,
-    posterior::PosteriorMeasure,
+    posterior::LBQIntegral,
     sampling_algorithm::A,
     context::BATContext
 ) where {N<:NamedTuple, A<:AbstractSamplingAlgorithm, I<:IntegrationAlgorithm}
@@ -195,9 +195,9 @@ function integrate_subspace(
 end
 
 function convert_to_posterior_resampled(
-    posterior::PosteriorMeasure,
+    posterior::LBQIntegral,
     partition_tree::SpacePartTree,
-    posterior_subspace::PosteriorMeasure;
+    posterior_subspace::LBQIntegral;
     extend_bounds::Bool=true
 )
 
@@ -221,7 +221,7 @@ function convert_to_posterior_resampled(
         x -> begin
             bounds = HyperRectBounds(x[:,1], x[:,2])
             prior_dist = truncate_density(getprior(posterior), bounds)
-            PosteriorMeasure(getlikelihood(posterior), prior_dist)
+            LBQIntegral(getlikelihood(posterior), prior_dist)
         end,
     subspaces_rect_bounds)
 
@@ -230,7 +230,7 @@ end
 
 
 
-function convert_to_posterior(posterior::PosteriorMeasure, partition_tree::SpacePartTree; extend_bounds::Bool=true)
+function convert_to_posterior(posterior::LBQIntegral, partition_tree::SpacePartTree; extend_bounds::Bool=true)
 
     if extend_bounds
         # Exploration samples might not always cover properly tails of the distribution.

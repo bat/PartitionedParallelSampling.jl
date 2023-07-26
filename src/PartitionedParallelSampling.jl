@@ -25,7 +25,7 @@ using Parameters: @with_kw
 using DocStringExtensions
 
 import BAT
-using BAT: AbstractMeasureOrDensity, AbstractPosteriorMeasure, PosteriorMeasure
+using BAT: BATMeasure, AbstractPosteriorMeasure, LBQIntegral
 using BAT: bat_sample, AbstractSamplingAlgorithm, MCMCSampling, OrderedResampling
 using BAT: bat_integrate, IntegrationAlgorithm, DensitySampleVector
 using BAT: bat_transform, AbstractTransformTarget, PriorToUniform

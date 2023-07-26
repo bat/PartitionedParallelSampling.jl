@@ -4,7 +4,7 @@ using PartitionedParallelSampling
 using Test
 using Distributions, LinearAlgebra, DensityInterface, ValueShapes
 
-using BAT: AbstractPosteriorMeasure, PosteriorMeasure
+using BAT: AbstractPosteriorMeasure, LBQIntegral
 using BAT: bat_sample, MCMCSampling, MetropolisHastings, IIDSampling
 using BAT: bat_transform, PriorToUniform, NoWhitening
 
@@ -26,7 +26,7 @@ using PartitionedParallelSampling: convert_to_posterior
         params -> logpdf(model, params.a)
     end)
 
-    posterior = PosteriorMeasure(likelihood, prior)
+    posterior = LBQIntegral(likelihood, prior)
     transformed_posterior, trafo = bat_transform(PriorToUniform(), posterior)
 
     #Sampling and integration algorithms
