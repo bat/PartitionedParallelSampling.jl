@@ -32,10 +32,10 @@ using BAT: bat_transform, AbstractTransformTarget, PriorToUniform
 using BAT: BATContext
 
 # BAT-experimental:
-using BAT: truncate_density
+using BAT: truncate_batmeasure
 
 # BAT-internal:
-using BAT: var_bounds, spatialvolume
+using BAT: measure_support, spatialvolume
 
 using AHMI: AHMIntegration
 

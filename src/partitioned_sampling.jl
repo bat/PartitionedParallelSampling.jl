@@ -33,7 +33,7 @@ end
 export PartitionedSampling
 
 function BAT.bat_sample_impl(rng::AbstractRNG, target::LBQIntegral, algorithm::PartitionedSampling, context::BATContext)
-    density_notrafo = convert(BATMeasure, target)
+    density_notrafo = batmeasure(target)
     shaped_density, trafo = bat_transform(algorithm.trafo, density_notrafo, context)
     density = unshaped(shaped_density)
 
@@ -220,7 +220,7 @@ function convert_to_posterior_resampled(
     posterior_array = map(
         x -> begin
             bounds = HyperRectBounds(x[:,1], x[:,2])
-            prior_dist = truncate_density(getprior(posterior), bounds)
+            prior_dist = truncate_batmeasure(getprior(posterior), bounds)
             LBQIntegral(getlikelihood(posterior), prior_dist)
         end,
     subspaces_rect_bounds)
@@ -235,7 +235,8 @@ function convert_to_posterior(posterior::LBQIntegral, partition_tree::SpacePartT
     if extend_bounds
         # Exploration samples might not always cover properly tails of the distribution.
         # We will extend boudnaries of the partition tree with original bounds which are:
-        vol = spatialvolume(var_bounds(posterior))
+        #!!!!!!!!!!!!!!!!!
+        vol = spatialvolume(measure_support(posterior))
         lo_bounds = vol.lo
         hi_bounds = vol.hi
         extend_tree_bounds!(partition_tree, lo_bounds, hi_bounds)
@@ -246,7 +247,7 @@ function convert_to_posterior(posterior::LBQIntegral, partition_tree::SpacePartT
 
     posterior_array = map(subspaces_rect_bounds) do x
         bounds = StructArray{Interval}((x[:,1], x[:,2]))
-        truncate_density(posterior, bounds)
+        truncate_batmeasure(posterior, bounds)
     end
 
     return posterior_array
