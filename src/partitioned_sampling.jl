@@ -32,18 +32,16 @@ end
 
 export PartitionedSampling
 
-function BAT.bat_sample_impl(rng::AbstractRNG, target::LBQIntegral, algorithm::PartitionedSampling, context::BATContext)
-    density_notrafo = batmeasure(target)
-    shaped_density, trafo = bat_transform(algorithm.trafo, density_notrafo, context)
-    density = unshaped(shaped_density)
+function BAT.bat_sample_impl(m::BATMeasure, algorithm::PartitionedSampling, context::BATContext)
+    transformed_m, trafo = BAT.transform_and_unshape(algorithm.trafo, m, context)
 
     @info "Generating Exploration Samples"
-    exploration_samples = bat_sample(density, algorithm.exploration_sampler).result
+    exploration_samples = bat_sample(transformed_m, algorithm.exploration_sampler).result
 
     @info "Constructing Partition Tree"
     partition_tree, cost_values = partition_space(exploration_samples, algorithm.npartitions, algorithm.partitioner)
     # Convert 'partition_tree' structure into a set of truncated posteriors:
-    posteriors_array = convert_to_posterior(density, partition_tree, extend_bounds = algorithm.partitioner.extend_bounds)
+    posteriors_array = convert_to_posterior(transformed_m, partition_tree, extend_bounds = algorithm.partitioner.extend_bounds)
 
     @info "Sampling Subspaces"
     iterator_subspaces = [
@@ -109,22 +107,21 @@ function BAT.bat_sample_impl(rng::AbstractRNG, target::LBQIntegral, algorithm::P
     samples_subspaces = pmap(inp -> integrate_subspace(inp, algorithm.integrator), samples_subspaces)
 
     @info "Combining Samples"
-    samples = deepcopy(samples_subspaces[1].samples)
+    transformed_smpls = deepcopy(samples_subspaces[1].samples)
     info = deepcopy(samples_subspaces[1].info)
     # Save indices from different subspaces:
-    info.samples_ind[1] = 1:length(samples)
+    info.samples_ind[1] = 1:length(transformed_smpls)
     for subspace in samples_subspaces[2:end]
-        start_ind, stop_ind = length(samples)+1, length(samples)+length(subspace.samples)
+        start_ind, stop_ind = length(transformed_smpls)+1, length(transformed_smpls)+length(subspace.samples)
         subspace.info.samples_ind[1] = start_ind:stop_ind
-        append!(samples, subspace.samples)
+        append!(transformed_smpls, subspace.samples)
         append!(info, subspace.info)
     end
 
-    samples_trafo = varshape(shaped_density).(samples)
-    samples_notrafo = inverse(trafo).(samples_trafo)
+    smpls = inverse(trafo).(transformed_smpls)
 
     return (
-        result = samples_notrafo, result_trafo = samples_trafo, trafo = trafo,
+        result = smpls, result_trafo = samples_trafo, trafo = trafo,
         info = info,
         exp_samples = exploration_samples, part_tree = partition_tree,
         cost_values = cost_values,
